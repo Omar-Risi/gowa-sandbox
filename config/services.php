@@ -35,11 +35,4 @@ return [
         ],
     ],
 
-    'gowa' => [
-        'base_url' => env('GOWA_BASE_URL', 'http://localhost:3000'),
-        'device_id' => env('GOWA_DEVICE_ID'),
-        'username' => env('GOWA_USERNAME'),
-        'password' => env('GOWA_PASSWORD'),
-    ],
-
 ];

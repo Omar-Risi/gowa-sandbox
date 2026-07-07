@@ -10,52 +10,90 @@ use App\Http\Requests\Api\V1\SendLocationRequest;
 use App\Http\Requests\Api\V1\SendPollRequest;
 use App\Http\Requests\Api\V1\SendPresenceRequest;
 use App\Http\Requests\Api\V1\SendTextMessageRequest;
-use App\Services\GowaClient;
+use App\Models\Message;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
+/**
+ * Sandbox catcher for Gowa's text-based send endpoints — modeled after
+ * Mailpit. Nothing is dispatched to a real WhatsApp/Gowa server; each
+ * call is simply captured as a Message so it can be inspected in the
+ * dashboard.
+ */
 class SendMessageController extends Controller
 {
-    public function __construct(private GowaClient $gowa) {}
-
     public function message(SendTextMessageRequest $request): JsonResponse
     {
-        return $this->forward('/send/message', $request);
+        return $this->capture($request, $request->validated('message'));
     }
 
     public function contact(SendContactRequest $request): JsonResponse
     {
-        return $this->forward('/send/contact', $request);
+        $body = sprintf('Contact card: %s (%s)', $request->validated('contact_name'), $request->validated('contact_phone'));
+
+        return $this->capture($request, $body);
     }
 
     public function link(SendLinkRequest $request): JsonResponse
     {
-        return $this->forward('/send/link', $request);
+        $body = trim($request->validated('caption')."\n".$request->validated('link'));
+
+        return $this->capture($request, $body);
     }
 
     public function location(SendLocationRequest $request): JsonResponse
     {
-        return $this->forward('/send/location', $request);
+        $body = sprintf('Location: %s, %s', $request->validated('latitude'), $request->validated('longitude'));
+
+        return $this->capture($request, $body);
     }
 
     public function poll(SendPollRequest $request): JsonResponse
     {
-        return $this->forward('/send/poll', $request);
+        $body = sprintf('Poll: %s (%s)', $request->validated('question'), implode(', ', $request->validated('options')));
+
+        return $this->capture($request, $body);
     }
 
     public function presence(SendPresenceRequest $request): JsonResponse
     {
-        return $this->forward('/send/presence', $request);
+        return response()->json($this->fakeResponse('presence update', Str::ulid()->toBase32()));
     }
 
     public function chatPresence(SendChatPresenceRequest $request): JsonResponse
     {
-        return $this->forward('/send/chat-presence', $request);
+        return response()->json($this->fakeResponse('chat presence update', Str::ulid()->toBase32()));
     }
 
-    private function forward(string $path, SendTextMessageRequest|SendContactRequest|SendLinkRequest|SendLocationRequest|SendPollRequest|SendPresenceRequest|SendChatPresenceRequest $request): JsonResponse
+    private function capture(Request $request, string $body): JsonResponse
     {
-        $response = $this->gowa->post($path, $request->validated(), $request->header('X-Device-Id'));
+        $messageId = strtoupper(Str::ulid()->toBase32());
 
-        return response()->json($response->json(), $response->status());
+        Message::create([
+            'message_id' => $messageId,
+            'chat_jid' => $request->validated('phone'),
+            'sender_name' => 'Me',
+            'body' => $body,
+            'is_from_me' => true,
+            'received_at' => now(),
+        ]);
+
+        return response()->json($this->fakeResponse('message', $messageId));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function fakeResponse(string $type, string $messageId): array
+    {
+        return [
+            'code' => 'SUCCESS',
+            'message' => 'Success',
+            'results' => [
+                'message_id' => $messageId,
+                'status' => "{$type} captured by sandbox",
+            ],
+        ];
     }
 }
