@@ -1,0 +1,15 @@
+.git
+.claude
+.env
+.env.*
+!.env.example
+node_modules
+vendor
+public/build
+public/hot
+bootstrap/cache/*.php
+storage/*.sqlite
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*

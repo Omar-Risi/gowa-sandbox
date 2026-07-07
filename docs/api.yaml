@@ -3,12 +3,13 @@ info:
   title: Gowa Sandbox API
   version: "1.0.0"
   description: |
-    Local Laravel wrapper around the Gowa WhatsApp Multi-Device API's text-based
-    send endpoints. File and audio sending (image, audio, file, sticker, video)
-    are intentionally excluded from this wrapper.
+    Local catcher for the Gowa WhatsApp Multi-Device API's text-based send
+    endpoints — the same idea as Mailpit for SMTP. Nothing is delivered to a
+    real WhatsApp/Gowa server; each call is captured and shown on the /dashboard
+    view instead. File and audio sending (image, audio, file, sticker, video)
+    are intentionally excluded from this sandbox.
 
-    This API is a local sandbox only. It does not require authentication.
-    Requests are forwarded to the Gowa server configured via `GOWA_BASE_URL`.
+    This API is a local sandbox only and does not require authentication.
 servers:
   - url: http://localhost:8000
 security: []
@@ -21,8 +22,6 @@ paths:
       operationId: sendMessage
       tags: [send]
       summary: Send a text message
-      parameters:
-        - $ref: '#/components/parameters/DeviceIdHeader'
       requestBody:
         required: true
         content:
@@ -64,8 +63,6 @@ paths:
       operationId: sendContact
       tags: [send]
       summary: Send a contact card
-      parameters:
-        - $ref: '#/components/parameters/DeviceIdHeader'
       requestBody:
         required: true
         content:
@@ -102,8 +99,6 @@ paths:
       operationId: sendLink
       tags: [send]
       summary: Send a link
-      parameters:
-        - $ref: '#/components/parameters/DeviceIdHeader'
       requestBody:
         required: true
         content:
@@ -140,8 +135,6 @@ paths:
       operationId: sendLocation
       tags: [send]
       summary: Send a location
-      parameters:
-        - $ref: '#/components/parameters/DeviceIdHeader'
       requestBody:
         required: true
         content:
@@ -178,8 +171,6 @@ paths:
       operationId: sendPoll
       tags: [send]
       summary: Send a poll / vote
-      parameters:
-        - $ref: '#/components/parameters/DeviceIdHeader'
       requestBody:
         required: true
         content:
@@ -218,8 +209,6 @@ paths:
       operationId: sendPresence
       tags: [send]
       summary: Send presence status
-      parameters:
-        - $ref: '#/components/parameters/DeviceIdHeader'
       requestBody:
         required: true
         content:
@@ -247,8 +236,6 @@ paths:
       operationId: sendChatPresence
       tags: [send]
       summary: Send chat presence (typing indicator)
-      parameters:
-        - $ref: '#/components/parameters/DeviceIdHeader'
       requestBody:
         required: true
         content:
@@ -273,17 +260,6 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
 components:
-  parameters:
-    DeviceIdHeader:
-      name: X-Device-Id
-      in: header
-      required: false
-      description: |
-        Gowa device identifier to forward to the Gowa server. Falls back to
-        GOWA_DEVICE_ID from the Laravel app's configuration when omitted.
-      schema:
-        type: string
-        example: 'my-device-id'
   responses:
     SendResponse:
       description: OK

@@ -43,16 +43,17 @@ Boost provides your agent 15+ tools and skills that help agents build Laravel ap
 
 ## Gowa Sandbox API
 
-This app exposes a small local wrapper around the [Gowa](https://github.com/tulir/whatsmeow) WhatsApp
-Multi-Device API's text-based send endpoints. Only text message types are wrapped — sending
+This app is a local catcher for [Gowa](https://github.com/tulir/whatsmeow) WhatsApp Multi-Device
+API's text-based send endpoints — the same idea as [Mailpit](https://mailpit.axllent.org/) for SMTP.
+Point your app at this sandbox instead of a real Gowa server: nothing is actually delivered to
+WhatsApp. Each call is simply captured and shown on the [dashboard](#dashboard), so you can develop
+against the Gowa API locally without a live device. Only text message types are covered — sending
 images, audio, files, stickers, and video is out of scope here. Full route definitions are in
 [`docs/api.yaml`](docs/api.yaml).
 
 **Base URL:** `http://localhost:8000/api/v1`
 
-This is a local sandbox, so **no username/password is required** to call these routes. The app
-forwards each request to your local Gowa server (configured via `GOWA_BASE_URL` in `.env`,
-default `http://localhost:3000`).
+This is a local sandbox, so **no username/password is required** to call these routes.
 
 ### Endpoints
 
@@ -77,8 +78,25 @@ curl -X POST http://localhost:8000/api/v1/send/message \
       }'
 ```
 
-Optionally pass an `X-Device-Id` header to target a specific Gowa device; otherwise the
-`GOWA_DEVICE_ID` configured in `.env` is used.
+### Dashboard
+
+Visit `/dashboard` to see every captured message: a list on the left (sender, preview, time),
+details of the selected message on the right. The list refreshes automatically as new messages
+are captured.
+
+## Running with Docker
+
+A `docker-compose.yml` is included to run the whole app (PHP, built assets, SQLite) without
+installing PHP/Node locally.
+
+```bash
+docker compose up -d --build
+```
+
+The app is served on `http://localhost:8000` (override the host port with `APP_PORT=8080 docker
+compose up -d`). Data is stored in a named `storage` volume, so it survives container restarts.
+Migrations run automatically on startup. Stop it with `docker compose down` (add `-v` to also wipe
+the stored data).
 
 ## Contributing
 
