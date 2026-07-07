@@ -1,0 +1,341 @@
+openapi: "3.0.0"
+info:
+  title: Gowa Sandbox API
+  version: "1.0.0"
+  description: |
+    Local Laravel wrapper around the Gowa WhatsApp Multi-Device API's text-based
+    send endpoints. File and audio sending (image, audio, file, sticker, video)
+    are intentionally excluded from this wrapper.
+
+    This API is a local sandbox only. It does not require authentication.
+    Requests are forwarded to the Gowa server configured via `GOWA_BASE_URL`.
+servers:
+  - url: http://localhost:8000
+security: []
+tags:
+  - name: send
+    description: Send text-based WhatsApp messages
+paths:
+  /api/v1/send/message:
+    post:
+      operationId: sendMessage
+      tags: [send]
+      summary: Send a text message
+      parameters:
+        - $ref: '#/components/parameters/DeviceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, message]
+              properties:
+                phone:
+                  type: string
+                  example: '6289685028129@s.whatsapp.net'
+                message:
+                  type: string
+                  example: selamat malam
+                reply_message_id:
+                  type: string
+                  example: 3EB089B9D6ADD58153C561
+                is_forwarded:
+                  type: boolean
+                  example: false
+                duration:
+                  type: integer
+                  enum: [0, 86400, 604800, 7776000]
+                  example: 86400
+                mentions:
+                  type: array
+                  items:
+                    type: string
+                  example: ["628123456789", "@everyone"]
+      responses:
+        '200':
+          $ref: '#/components/responses/SendResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/v1/send/contact:
+    post:
+      operationId: sendContact
+      tags: [send]
+      summary: Send a contact card
+      parameters:
+        - $ref: '#/components/parameters/DeviceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, contact_name, contact_phone]
+              properties:
+                phone:
+                  type: string
+                  example: '6289685024051@s.whatsapp.net'
+                contact_name:
+                  type: string
+                  example: Aldino Kemal
+                contact_phone:
+                  type: string
+                  example: '6289685024992'
+                is_forwarded:
+                  type: boolean
+                  example: false
+                duration:
+                  type: integer
+                  enum: [0, 86400, 604800, 7776000]
+                  example: 86400
+      responses:
+        '200':
+          $ref: '#/components/responses/SendResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/v1/send/link:
+    post:
+      operationId: sendLink
+      tags: [send]
+      summary: Send a link
+      parameters:
+        - $ref: '#/components/parameters/DeviceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, link]
+              properties:
+                phone:
+                  type: string
+                  example: '6289685024051@s.whatsapp.net'
+                link:
+                  type: string
+                  example: 'https://google.com'
+                caption:
+                  type: string
+                  example: 'Halo ini contoh caption'
+                is_forwarded:
+                  type: boolean
+                  example: false
+                duration:
+                  type: integer
+                  enum: [0, 86400, 604800, 7776000]
+                  example: 86400
+      responses:
+        '200':
+          $ref: '#/components/responses/SendResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/v1/send/location:
+    post:
+      operationId: sendLocation
+      tags: [send]
+      summary: Send a location
+      parameters:
+        - $ref: '#/components/parameters/DeviceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, latitude, longitude]
+              properties:
+                phone:
+                  type: string
+                  example: '6289685024051@s.whatsapp.net'
+                latitude:
+                  type: string
+                  example: '-7.797068'
+                longitude:
+                  type: string
+                  example: '110.370529'
+                is_forwarded:
+                  type: boolean
+                  example: false
+                duration:
+                  type: integer
+                  enum: [0, 86400, 604800, 7776000]
+                  example: 86400
+      responses:
+        '200':
+          $ref: '#/components/responses/SendResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/v1/send/poll:
+    post:
+      operationId: sendPoll
+      tags: [send]
+      summary: Send a poll / vote
+      parameters:
+        - $ref: '#/components/parameters/DeviceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, question, options, max_answer]
+              properties:
+                phone:
+                  type: string
+                  example: '6289685024421@s.whatsapp.net'
+                question:
+                  type: string
+                  example: 'Siapa Nama Avatar The Last Air Bender?'
+                options:
+                  type: array
+                  items:
+                    type: string
+                  example: ['Zuko', 'Aang', 'Katara']
+                max_answer:
+                  type: integer
+                  example: 2
+                duration:
+                  type: integer
+                  enum: [0, 86400, 604800, 7776000]
+                  example: 86400
+      responses:
+        '200':
+          $ref: '#/components/responses/SendResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/v1/send/presence:
+    post:
+      operationId: sendPresence
+      tags: [send]
+      summary: Send presence status
+      parameters:
+        - $ref: '#/components/parameters/DeviceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type]
+              properties:
+                type:
+                  type: string
+                  enum: [available, unavailable]
+                  example: available
+                is_forwarded:
+                  type: boolean
+                  example: false
+      responses:
+        '200':
+          $ref: '#/components/responses/SendResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/v1/send/chat-presence:
+    post:
+      operationId: sendChatPresence
+      tags: [send]
+      summary: Send chat presence (typing indicator)
+      parameters:
+        - $ref: '#/components/parameters/DeviceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, action]
+              properties:
+                phone:
+                  type: string
+                  example: '6289685024051@s.whatsapp.net'
+                action:
+                  type: string
+                  enum: [start, stop]
+                  example: start
+      responses:
+        '200':
+          $ref: '#/components/responses/SendResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  parameters:
+    DeviceIdHeader:
+      name: X-Device-Id
+      in: header
+      required: false
+      description: |
+        Gowa device identifier to forward to the Gowa server. Falls back to
+        GOWA_DEVICE_ID from the Laravel app's configuration when omitted.
+      schema:
+        type: string
+        example: 'my-device-id'
+  responses:
+    SendResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: string
+                example: SUCCESS
+              message:
+                type: string
+                example: Success
+              results:
+                type: object
+                properties:
+                  message_id:
+                    type: string
+                    example: '3EB0B430B6F8F1D0E053AC120E0A9E5C'
+                  status:
+                    type: string
+                    example: 'message success ....'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: string
+                example: '400'
+              message:
+                type: string
+                example: field cannot be blank
+              results:
+                type: object
+                nullable: true
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: string
+                example: INTERNAL_SERVER_ERROR
+              message:
+                type: string
+                example: you are not logged in
+              results:
+                type: object
+                nullable: true

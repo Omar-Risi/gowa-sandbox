@@ -41,6 +41,45 @@ php artisan boost:install
 
 Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
 
+## Gowa Sandbox API
+
+This app exposes a small local wrapper around the [Gowa](https://github.com/tulir/whatsmeow) WhatsApp
+Multi-Device API's text-based send endpoints. Only text message types are wrapped — sending
+images, audio, files, stickers, and video is out of scope here. Full route definitions are in
+[`docs/api.yaml`](docs/api.yaml).
+
+**Base URL:** `http://localhost:8000/api/v1`
+
+This is a local sandbox, so **no username/password is required** to call these routes. The app
+forwards each request to your local Gowa server (configured via `GOWA_BASE_URL` in `.env`,
+default `http://localhost:3000`).
+
+### Endpoints
+
+| Method | Path                       | Purpose                        |
+|--------|-----------------------------|---------------------------------|
+| POST   | `/api/v1/send/message`      | Send a text message             |
+| POST   | `/api/v1/send/contact`      | Send a contact card             |
+| POST   | `/api/v1/send/link`         | Send a link                     |
+| POST   | `/api/v1/send/location`     | Send a location                 |
+| POST   | `/api/v1/send/poll`         | Send a poll / vote              |
+| POST   | `/api/v1/send/presence`     | Send presence status            |
+| POST   | `/api/v1/send/chat-presence`| Send typing indicator            |
+
+### Example
+
+```bash
+curl -X POST http://localhost:8000/api/v1/send/message \
+  -H "Content-Type: application/json" \
+  -d '{
+        "phone": "6289685028129@s.whatsapp.net",
+        "message": "selamat malam"
+      }'
+```
+
+Optionally pass an `X-Device-Id` header to target a specific Gowa device; otherwise the
+`GOWA_DEVICE_ID` configured in `.env` is used.
+
 ## Contributing
 
 Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
